@@ -1,9 +1,8 @@
-﻿namespace TB_CameraTweaker.KsHelperLib.Localization
+﻿namespace TB_CameraTweaker.KsHelperLib.EasyLoc.Models
 {
-    internal class LocEntryModel
+    internal class LanguageEntry
     {
-        public LocEntryModel(string key, string text, string comment = "")
-        {
+        public LanguageEntry(string key, string text, string comment = "") {
             Key = key;
             Text = text;
             Comment = comment;

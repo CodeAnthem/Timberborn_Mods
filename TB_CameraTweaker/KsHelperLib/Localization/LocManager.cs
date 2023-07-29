@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TB_CameraTweaker.KsHelperLib.EasyLoc.Models;
 using TB_CameraTweaker.KsHelperLib.Logger;
 
 namespace TB_CameraTweaker.KsHelperLib.Localization
@@ -12,7 +13,7 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
 
     {
         private readonly LocLangFileHandler FileHandler;
-        private readonly Dictionary<string, IEnumerable<LocEntryModel>> PredefinedLanguages = new();
+        private readonly Dictionary<string, IEnumerable<LanguageEntry>> PredefinedLanguages = new();
         private bool Initialized;
         private string LangDirPath;
         private readonly List<string> AllLanguageTags = new();
@@ -55,14 +56,14 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
             foreach (var language in languages) {
                 var l = (ILanguage)Activator.CreateInstance(language);
 
-                List<LocEntryModel> entriesWithTag = new();
+                List<LanguageEntry> entriesWithTag = new();
                 foreach (var entry in l.GetEntries()) {
                     string keyWithTag = LocConfig.LocTag + "." + entry.Key;
-                    LocEntryModel fixedEntry = new(keyWithTag, entry.Text, entry.Comment);
+                    LanguageEntry fixedEntry = new(keyWithTag, entry.Text, entry.Comment);
                     entriesWithTag.Add(fixedEntry);
                 }
-                bool successfullyAdded = PredefinedLanguages.TryAdd(l.Tag, entriesWithTag);
-                if (!successfullyAdded) throw new Exception($"Failed to add language: {l.Tag}");
+                bool successfullyAdded = PredefinedLanguages.TryAdd(l.LanguageTag, entriesWithTag);
+                if (!successfullyAdded) throw new Exception($"Failed to add language: {l.LanguageTag}");
             }
             _log.LogDebug($"Found {PredefinedLanguages.Count} Languages By Reflection");
         }
@@ -110,7 +111,7 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
             }
         }
 
-        private void VerifyLangFileContent(FileInfo langFile, IEnumerable<LocEntryModel> updatedEntries, bool writeComments = false) {
+        private void VerifyLangFileContent(FileInfo langFile, IEnumerable<LanguageEntry> updatedEntries, bool writeComments = false) {
             //Log.LogDebug("VerifyLangFileContent, Get Current Content");
             //foreach (var item in updatedEntries)
             //{
@@ -124,7 +125,7 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
             //}
 
             bool inconsistent = false;
-            List<LocEntryModel> newEntries = new();
+            List<LanguageEntry> newEntries = new();
 
             foreach (var currentEntry in currentEntries) {
                 bool currentEntryStillExists = false;
@@ -140,11 +141,11 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
             //}
 
             foreach (var updatedEntry in updatedEntries) {
-                LocEntryModel newEntry = newEntries.FirstOrDefault(x => x.Key == updatedEntry.Key);
+                LanguageEntry newEntry = newEntries.FirstOrDefault(x => x.Key == updatedEntry.Key);
                 if (newEntry != default) continue;
 
-                if (writeComments) newEntries.Add(new LocEntryModel(updatedEntry.Key, updatedEntry.Text, updatedEntry.Comment));
-                else newEntries.Add(new LocEntryModel(updatedEntry.Key, updatedEntry.Text, string.Empty));
+                if (writeComments) newEntries.Add(new LanguageEntry(updatedEntry.Key, updatedEntry.Text, updatedEntry.Comment));
+                else newEntries.Add(new LanguageEntry(updatedEntry.Key, updatedEntry.Text, string.Empty));
                 inconsistent = true;
             }
             //foreach (var item in newEntries)
@@ -152,10 +153,12 @@ namespace TB_CameraTweaker.KsHelperLib.Localization
             //    Log.LogDebug($"VerifyLangFileContent,newEntries2: `{item.Key}` `{item.Text}` `{item.Comment}`");
             //}
             //Log.LogDebug($"VerifyLangFileContent, NeedUpdate? {inconsistent} - Verify Complete: {newEntries.Count} Lines");
-            if (inconsistent) WriteUpdateToFile(langFile, newEntries);
+            if (inconsistent) {
+                WriteUpdateToFile(langFile, newEntries);
+            }
         }
 
-        private void WriteUpdateToFile(FileInfo langFile, IEnumerable<LocEntryModel> updatedEntries) {
+        private void WriteUpdateToFile(FileInfo langFile, IEnumerable<LanguageEntry> updatedEntries) {
             var sortedNewEntries = updatedEntries.OrderBy(x => x.Key).ToList();
             FileHandler.WriteUpdatedContent(langFile, sortedNewEntries);
         }

@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using TB_CameraTweaker.KsHelperLib.EasyLoc;
 using TB_CameraTweaker.KsHelperLib.Localization;
 using TB_CameraTweaker.KsHelperLib.Logger;
 
@@ -19,8 +20,14 @@ namespace TB_CameraTweaker
             SetupLogger();
             Config = base.Config;
             Config.SaveOnConfigSet = true;
-            SetupLOC();
+            SetupEasyLoc();
             Log.LogInfo($"Plugin '{MyPluginInfo.PLUGIN_GUID}' is loaded!");
+        }
+
+        private void SetupEasyLoc() {
+            EasyLocConfig.AddHeaderLine($"{MyPluginInfo.PLUGIN_NAME}, Updated: {DateTime.Now}");
+            EasyLocConfig.AddHeaderLine("");
+            EasyLocConfig.AddAdditionalLanguage("deDE");
         }
 
         private void SetupLogger() {
@@ -30,15 +37,6 @@ namespace TB_CameraTweaker
 #if (DEBUG)
             LogProxy.Level = BepInEx.Logging.LogLevel.All;
 #endif
-        }
-
-        private void SetupLOC() {
-            LocConfig.AddAdditionalLanguage("deDE");
-            LocConfig.Header = new List<string>()
-            {
-                $"{MyPluginInfo.PLUGIN_NAME}, Updated: {DateTime.Now}",
-                ""
-            };
         }
     }
 }

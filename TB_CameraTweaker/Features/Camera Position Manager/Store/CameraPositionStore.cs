@@ -23,7 +23,7 @@ namespace TB_CameraTweaker.CameraPositions.Store
 
         public CameraPositionStore(IDataSaver<CameraPositionInfo> saver) {
             _saver = saver;
-            _saver.SaveFile = $@"{BepInEx.Paths.ConfigPath}\{MyPluginInfo.PLUGIN_GUID}_cameraPositions.json";
+            _saver.PathOfSaveFile = $@"{BepInEx.Paths.ConfigPath}\{MyPluginInfo.PLUGIN_GUID}_cameraPositions.json";
             SavedCameraPositions = _savedCameraPositions.AsReadOnlyList();
         }
 
